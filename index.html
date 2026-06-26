@@ -13,9 +13,6 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
 
-  <!-- config.js с ключами (не пушить в GitHub) -->
-  <script src="config.js"></script>
-
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -59,7 +56,7 @@
     <main id="content"></main>
   </div>
 
-  <!-- МОДАЛЬНЫЕ ОКНА (правила, конфиденциальность) -->
+  <!-- МОДАЛЬНЫЕ ОКНА -->
   <div id="rulesModal" class="modal hidden">
     <div class="modal-content">
       <h2>Правила пользования</h2>
@@ -87,6 +84,11 @@
       <button class="btn-primary" onclick="closeModal('privacyModal')">Закрыть</button>
     </div>
   </div>
+
+  <script>
+    // Ключи вшиты прямо здесь (позже можно вынести в config.js)
+    window.FIREBASE_API_KEY = "AIzaSyAUtr27T3vQsSA0n-yWvkU4XinthqRJBSQ";
+  </script>
 
   <script src="script.js"></script>
 </body>
