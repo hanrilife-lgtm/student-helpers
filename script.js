@@ -4,7 +4,6 @@
 let currentSubject = 'termeh';
 let consentGiven = false;
 
-// Контент предметов
 const contentData = {
   termeh: `
     <h2>Теоретическая механика</h2>
@@ -39,7 +38,7 @@ const contentData = {
   `
 };
 
-// ========== ТЕМА (без изменений) ==========
+// ========== ТЕМА ==========
 function toggleTheme() {
   const html = document.documentElement;
   const current = html.getAttribute('data-theme');
@@ -71,7 +70,7 @@ function createParticles() {
 }
 createParticles();
 
-// ========== АВТОРИЗАЦИЯ (email без пароля) ==========
+// ========== АВТОРИЗАЦИЯ ==========
 function checkConsent() {
   consentGiven = document.getElementById('consentRules').checked && document.getElementById('consentPrivacy').checked;
 }
@@ -157,7 +156,7 @@ menuButtons.forEach(btn => {
 menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
 document.addEventListener('click', (e) => { if (!sidebar.contains(e.target) && e.target !== menuToggle) sidebar.classList.remove('open'); });
 
-// ========== ИИ-РЕПЕТИТОР (использует Gemini-ключ из config.js) ==========
+// ========== ИИ-РЕПЕТИТОР ==========
 const SYSTEM_PROMPTS = {
   termeh: `Ты — репетитор по термеху. Помогай студенту разобраться, не давая готовых ответов. Используй сократовский метод. Формулы в LaTeX.`,
   sopromat: `Ты — репетитор по сопромату. Помогай студенту разобраться, в том числе с чертежами: если он присылает фото задачи или схемы, проанализируй и подскажи, как строить эпюры. Формулы в LaTeX.`,
@@ -170,7 +169,6 @@ const WELCOME_TEXTS = {
   tos: 'Привет! Я ИИ-репетитор по ТОС. Расскажи задачу, можешь прикрепить фото сигнала 🙂'
 };
 
-// API-ключ Gemini теперь берётся из config.js
 const GEMINI_API_KEY = window.GEMINI_API_KEY || '';
 const GEMINI_MODEL = 'gemini-2.5-flash';
 
@@ -223,7 +221,7 @@ async function sendChatMessage() {
   const text = input.value.trim();
   if (!text && !pendingImage) return;
   const apiKey = GEMINI_API_KEY;
-  if (!apiKey) { appendMessage('assistant', 'API-ключ Gemini не найден. Проверь файл config.js.', false); return; }
+  if (!apiKey) { appendMessage('assistant', 'API-ключ Gemini не найден.', false); return; }
   const displayText = text || 'Вот фото задачи.';
   appendMessage('user', displayText, false, pendingImage ? pendingImage.previewUrl : null);
   const parts = [];
