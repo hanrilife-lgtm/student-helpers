@@ -105,31 +105,36 @@
     </div>
   </div>
 
-  <script>
-    // Инициализация Firebase (compat)
-    const firebaseConfig = {
-      apiKey: window.FIREBASE_API_KEY,
-      authDomain: "helps-debcc.firebaseapp.com",
-      projectId: "helps-debcc",
-      storageBucket: "helps-debcc.firebasestorage.app",
-      messagingSenderId: "521229004953",
-      appId: "1:521229004953:web:2c2f4fc8affe76ada80808"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+<script>
+  const firebaseConfig = {
+    apiKey: window.FIREBASE_API_KEY,
+    authDomain: "helps-debcc.firebaseapp.com",
+    projectId: "helps-debcc",
+    storageBucket: "helps-debcc.firebasestorage.app",
+    messagingSenderId: "521229004953",
+    appId: "1:521229004953:web:2c2f4fc8affe76ada80808"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
 
-    // Экспортируем функции в window для script.js
-    window.firebaseSendSignInLink = (email) => {
-      const actionCodeSettings = {
-        url: window.location.href,
-        handleCodeInApp: true
-      };
-      return auth.sendSignInLinkToEmail(email, actionCodeSettings);
+  window.firebaseSendSignInLink = (email) => {
+    const actionCodeSettings = {
+      url: window.location.href,
+      handleCodeInApp: true
     };
-    window.firebaseSignInWithLink = (email, link) => auth.signInWithEmailLink(email, link);
-    window.firebaseSignOut = () => auth.signOut();
-    window.firebaseOnAuthChange = (callback) => auth.onAuthStateChanged(callback);
-  </script>
+    return auth.sendSignInLinkToEmail(email, actionCodeSettings);
+  };
+
+  window.firebaseSignInWithLink = (email, link) => {
+    return auth.signInWithEmailLink(email, link);
+  };
+
+  window.firebaseSignOut = () => auth.signOut();
+
+  window.firebaseOnAuthChange = (callback) => {
+    return auth.onAuthStateChanged(callback);
+  };
+</script>
 
   <script src="script.js"></script>
 </body>
