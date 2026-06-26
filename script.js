@@ -70,7 +70,7 @@ function createParticles() {
 }
 createParticles();
 
-// ========== АВТОРИЗАЦИЯ ==========
+// ========== АВТОРИЗАЦИЯ (простой email) ==========
 function checkConsent() {
   consentGiven = document.getElementById('consentRules').checked && document.getElementById('consentPrivacy').checked;
 }
@@ -78,63 +78,38 @@ function checkConsent() {
 function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-async function sendSignInCode() {
+function loginWithEmail() {
   const email = document.getElementById('emailInput').value.trim();
   const errorEl = document.getElementById('authError');
   if (!email) { errorEl.textContent = 'Введите email'; return; }
   if (!consentGiven) { errorEl.textContent = 'Необходимо согласиться с правилами и политикой'; return; }
-  try {
-    await window.firebaseSendSignInLink(email);
-    localStorage.setItem('signInEmail', email);
-    document.getElementById('stepEmail').classList.add('hidden');
-    document.getElementById('stepCode').classList.remove('hidden');
-    document.getElementById('emailDisplay').textContent = email;
-    errorEl.textContent = '';
-  } catch (error) {
-    errorEl.textContent = 'Ошибка: ' + error.message;
+
+  // Сохраняем email в localStorage
+  localStorage.setItem('userEmail', email);
+  errorEl.textContent = '';
+  showMainScreen();
+}
+
+function logoutUser() {
+  localStorage.removeItem('userEmail');
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('mainScreen').classList.add('hidden');
+}
+
+function showMainScreen() {
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('mainScreen').classList.remove('hidden');
+  if (!document.getElementById('content').innerHTML) {
+    document.getElementById('content').innerHTML = contentData.termeh;
+    if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([document.getElementById('content')]).catch(() => {});
+    setTimeout(initAITutor, 200);
   }
 }
 
-async function verifyCode() {
-  const email = localStorage.getItem('signInEmail');
-  const code = document.getElementById('codeInput').value.trim();
-  const errorEl = document.getElementById('codeError');
-  if (!code) { errorEl.textContent = 'Введите код из письма'; return; }
-  try {
-    const link = `${window.location.origin}/?oobCode=${code}&mode=signIn&apiKey=${window.FIREBASE_API_KEY}`;
-    await window.firebaseSignInWithLink(email, link);
-    localStorage.removeItem('signInEmail');
-  } catch (error) {
-    errorEl.textContent = 'Неверный код или срок действия истёк. Попробуйте снова.';
-  }
+// Проверка при загрузке страницы
+if (localStorage.getItem('userEmail')) {
+  showMainScreen();
 }
-
-function goBackToEmail() {
-  document.getElementById('stepCode').classList.add('hidden');
-  document.getElementById('stepEmail').classList.remove('hidden');
-  localStorage.removeItem('signInEmail');
-}
-
-async function logoutUser() { await window.firebaseSignOut(); }
-
-window.firebaseOnAuthChange((user) => {
-  const authScreen = document.getElementById('authScreen');
-  const mainScreen = document.getElementById('mainScreen');
-  if (user) {
-    authScreen.classList.add('hidden');
-    mainScreen.classList.remove('hidden');
-    if (!document.getElementById('content').innerHTML) {
-      document.getElementById('content').innerHTML = contentData.termeh;
-      if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([document.getElementById('content')]).catch(() => {});
-      setTimeout(initAITutor, 200);
-    }
-  } else {
-    authScreen.classList.remove('hidden');
-    mainScreen.classList.add('hidden');
-    document.getElementById('stepCode').classList.add('hidden');
-    document.getElementById('stepEmail').classList.remove('hidden');
-  }
-});
 
 // ========== ПЕРЕКЛЮЧЕНИЕ ПРЕДМЕТОВ ==========
 const menuButtons = document.querySelectorAll('.menu-btn');
@@ -159,8 +134,8 @@ document.addEventListener('click', (e) => { if (!sidebar.contains(e.target) && e
 // ========== ИИ-РЕПЕТИТОР ==========
 const SYSTEM_PROMPTS = {
   termeh: `Ты — репетитор по термеху. Помогай студенту разобраться, не давая готовых ответов. Используй сократовский метод. Формулы в LaTeX.`,
-  sopromat: `Ты — репетитор по сопромату. Помогай студенту разобраться, в том числе с чертежами: если он присылает фото задачи или схемы, проанализируй и подскажи, как строить эпюры. Формулы в LaTeX.`,
-  tos: `Ты — репетитор по ТОС. Помогай студенту разобраться, в том числе с графиками: если он присылает фото сигнала или схемы, проанализируй и объясни, как строить спектр, АЧХ, ФЧХ. Формулы в LaTeX.`
+  sopromat: `Ты — репетитор по сопромату. Помогай студенту разобраться, в том числе с чертежами. Формулы в LaTeX.`,
+  tos: `Ты — репетитор по ТОС. Помогай студенту разобраться, в том числе с графиками. Формулы в LaTeX.`
 };
 
 const WELCOME_TEXTS = {
