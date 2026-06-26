@@ -84,7 +84,6 @@ function loginWithEmail() {
   if (!email) { errorEl.textContent = 'Введите email'; return; }
   if (!consentGiven) { errorEl.textContent = 'Необходимо согласиться с правилами и политикой'; return; }
 
-  // Сохраняем email в localStorage
   localStorage.setItem('userEmail', email);
   errorEl.textContent = '';
   showMainScreen();
@@ -106,7 +105,6 @@ function showMainScreen() {
   }
 }
 
-// Проверка при загрузке страницы
 if (localStorage.getItem('userEmail')) {
   showMainScreen();
 }
