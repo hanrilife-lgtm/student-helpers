@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Помощник студентам — Термех, Сопромат, ТОС</title>
 
-  <script src="config.js"></script>
-
   <script>
     window.MathJax = {
       tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -14,6 +12,13 @@
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+
+  <!-- config.js (хранит ключи локально, не пушить в GitHub) -->
+  <script src="config.js"></script>
+
+  <!-- Firebase compat (не модуль, работает везде) -->
+  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth-compat.js"></script>
 
   <link rel="stylesheet" href="style.css">
 </head>
@@ -100,39 +105,31 @@
     </div>
   </div>
 
-  <!-- FIREBASE + ИИ-РЕПЕТИТОР -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-  import { getAuth, sendSignInLinkToEmail, signInWithEmailLink, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: window.FIREBASE_API_KEY,
-    authDomain: "helps-debcc.firebaseapp.com",
-    projectId: "helps-debcc",
-    storageBucket: "helps-debcc.firebasestorage.app",
-    messagingSenderId: "521229004953",
-    appId: "1:521229004953:web:2c2f4fc8affe76ada80808"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  // ✅ Правильно экспортируем функции в window
-  window.firebaseSendSignInLink = (email) => {
-    const actionCodeSettings = {
-      url: window.location.href,
-      handleCodeInApp: true
+  <script>
+    // Инициализация Firebase (compat)
+    const firebaseConfig = {
+      apiKey: window.FIREBASE_API_KEY,
+      authDomain: "helps-debcc.firebaseapp.com",
+      projectId: "helps-debcc",
+      storageBucket: "helps-debcc.firebasestorage.app",
+      messagingSenderId: "521229004953",
+      appId: "1:521229004953:web:2c2f4fc8affe76ada80808"
     };
-    return sendSignInLinkToEmail(auth, email, actionCodeSettings);
-  };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-  window.firebaseSignInWithLink = (email, link) => {
-    return signInWithEmailLink(auth, email, link);
-  };
-
-  window.firebaseSignOut = () => signOut(auth);
-  window.firebaseOnAuthChange = (callback) => onAuthStateChanged(auth, callback);
-</script>
+    // Экспортируем функции в window для script.js
+    window.firebaseSendSignInLink = (email) => {
+      const actionCodeSettings = {
+        url: window.location.href,
+        handleCodeInApp: true
+      };
+      return auth.sendSignInLinkToEmail(email, actionCodeSettings);
+    };
+    window.firebaseSignInWithLink = (email, link) => auth.signInWithEmailLink(email, link);
+    window.firebaseSignOut = () => auth.signOut();
+    window.firebaseOnAuthChange = (callback) => auth.onAuthStateChanged(callback);
+  </script>
 
   <script src="script.js"></script>
 </body>
