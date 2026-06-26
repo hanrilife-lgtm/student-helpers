@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Помощник студентам — Термех, Сопромат, ТОС</title>
+
+  <!-- Подключаем конфиг с ключами (не загружается на GitHub) -->
+  <script src="config.js"></script>
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="particles"></div>
+
+  <!-- ЭКРАН ВХОДА -->
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-container">
+      <div class="auth-logo">📚</div>
+      <h1>Помощник студентам</h1>
+      <p>Введите email для входа или регистрации</p>
+
+      <div id="stepEmail">
+        <input type="email" id="emailInput" placeholder="Email" autocomplete="email">
+        <button class="btn-primary" onclick="sendSignInCode()">Получить код</button>
+        <p class="auth-error" id="authError"></p>
+      </div>
+
+      <div id="stepCode" class="hidden">
+        <p>Введите код из письма, отправленного на <strong id="emailDisplay"></strong></p>
+        <input type="text" id="codeInput" placeholder="Код из 6 цифр" maxlength="6">
+        <div class="auth-buttons">
+          <button class="btn-primary" onclick="verifyCode()">Подтвердить</button>
+          <button class="btn-text" onclick="goBackToEmail()">Назад</button>
+        </div>
+        <p class="auth-error" id="codeError"></p>
+      </div>
+
+      <div class="consent-box">
+        <label><input type="checkbox" id="consentRules" onchange="checkConsent()"> Я согласен с <a href="#" onclick="showModal('rulesModal')">правилами пользования</a></label>
+        <label><input type="checkbox" id="consentPrivacy" onchange="checkConsent()"> Я согласен с <a href="#" onclick="showModal('privacyModal')">политикой конфиденциальности</a></label>
+      </div>
+      <p class="note">После входа откроется доступ ко всем предметам</p>
+    </div>
+  </div>
+
+  <!-- ОСНОВНОЙ ЭКРАН -->
+  <div id="mainScreen" class="main-screen hidden">
+    <aside id="sidebar" class="sidebar">
+      <h2 class="sidebar-title">Предметы</h2>
+      <nav>
+        <button class="menu-btn active" data-subject="termeh">⚙️ Теормех</button>
+        <button class="menu-btn" data-subject="sopromat">🔩 Сопромат</button>
+        <button class="menu-btn" data-subject="tos">📡 ТОС</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="theme-btn" onclick="toggleTheme()"><span id="themeIcon">☀️</span> <span id="themeLabel">Светлая тема</span></button>
+        <button class="logout-btn" onclick="logoutUser()">🚪 Выйти</button>
+      </div>
+    </aside>
+    <button id="menuToggle" class="menu-toggle">☰</button>
+    <main id="content"></main>
+  </div>
+
+  <!-- МОДАЛЬНЫЕ ОКНА -->
+  <div id="rulesModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Правила пользования</h2>
+      <div class="modal-text">
+        <p>1. Сервис предоставляет доступ к учебным материалам и ИИ-репетитору.</p>
+        <p>2. Запрещено использовать сервис для списывания на экзаменах.</p>
+        <p>3. Запрещено загружать вредоносный код или контент.</p>
+        <p>4. Администрация оставляет за собой право блокировать аккаунты за нарушение правил.</p>
+        <p>5. Все материалы защищены авторским правом.</p>
+      </div>
+      <button class="btn-primary" onclick="closeModal('rulesModal')">Закрыть</button>
+    </div>
+  </div>
+
+  <div id="privacyModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Политика конфиденциальности</h2>
+      <div class="modal-text">
+        <p>1. Мы собираем только email для работы сервиса.</p>
+        <p>2. Пароли не используются — вход по одноразовому коду.</p>
+        <p>3. Мы не передаём данные третьим лицам.</p>
+        <p>4. ИИ-репетитор использует Google Gemini API — ваши запросы отправляются на серверы Google.</p>
+        <p>5. Вы можете удалить аккаунт в любой момент, все данные будут удалены.</p>
+        <p>6. Мы используем куки только для хранения темы и API-ключа (локально).</p>
+      </div>
+      <button class="btn-primary" onclick="closeModal('privacyModal')">Закрыть</button>
+    </div>
+  </div>
+
+  <!-- FIREBASE + ИИ-РЕПЕТИТОР -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getAuth, sendSignInLinkToEmail, signInWithEmailLink, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+    // Используем ключ из config.js
+    const firebaseConfig = {
+      apiKey: window.FIREBASE_API_KEY,
+      authDomain: "helps-debcc.firebaseapp.com",
+      projectId: "helps-debcc",
+      storageBucket: "helps-debcc.firebasestorage.app",
+      messagingSenderId: "521229004953",
+      appId: "1:521229004953:web:2c2f4fc8affe76ada80808"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.firebaseAuth = auth;
+    window.firebaseSignOut = () => signOut(auth);
+    window.firebaseOnAuthChange = (callback) => onAuthStateChanged(auth, callback);
+    window.firebaseSendSignInLink = (email) => {
+      const actionCodeSettings = {
+        url: window.location.href,
+        handleCodeInApp: true
+      };
+      return sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    };
+    window.firebaseSignInWithLink = (email, link) => signInWithEmailLink(auth, email, link);
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>
