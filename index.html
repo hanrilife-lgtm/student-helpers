@@ -13,12 +13,8 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
 
-  <!-- config.js (хранит ключи локально, не пушить в GitHub) -->
+  <!-- config.js с ключами (не пушить в GitHub) -->
   <script src="config.js"></script>
-
-  <!-- Firebase compat (не модуль, работает везде) -->
-  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth-compat.js"></script>
 
   <link rel="stylesheet" href="style.css">
 </head>
@@ -31,23 +27,11 @@
     <div class="auth-container">
       <div class="auth-logo">📚</div>
       <h1>Помощник студентам</h1>
-      <p>Введите email для входа или регистрации</p>
+      <p>Введите email для входа</p>
 
-      <div id="stepEmail">
-        <input type="email" id="emailInput" placeholder="Email" autocomplete="email">
-        <button class="btn-primary" onclick="sendSignInCode()">Получить код</button>
-        <p class="auth-error" id="authError"></p>
-      </div>
-
-      <div id="stepCode" class="hidden">
-        <p>Введите код из письма, отправленного на <strong id="emailDisplay"></strong></p>
-        <input type="text" id="codeInput" placeholder="Код из 6 цифр" maxlength="6">
-        <div class="auth-buttons">
-          <button class="btn-primary" onclick="verifyCode()">Подтвердить</button>
-          <button class="btn-text" onclick="goBackToEmail()">Назад</button>
-        </div>
-        <p class="auth-error" id="codeError"></p>
-      </div>
+      <input type="email" id="emailInput" placeholder="Email" autocomplete="email">
+      <button class="btn-primary" onclick="loginWithEmail()">Войти</button>
+      <p class="auth-error" id="authError"></p>
 
       <div class="consent-box">
         <label><input type="checkbox" id="consentRules" onchange="checkConsent()"> Я согласен с <a href="#" onclick="showModal('rulesModal')">правилами пользования</a></label>
@@ -75,7 +59,7 @@
     <main id="content"></main>
   </div>
 
-  <!-- МОДАЛЬНЫЕ ОКНА -->
+  <!-- МОДАЛЬНЫЕ ОКНА (правила, конфиденциальность) -->
   <div id="rulesModal" class="modal hidden">
     <div class="modal-content">
       <h2>Правила пользования</h2>
@@ -94,47 +78,15 @@
     <div class="modal-content">
       <h2>Политика конфиденциальности</h2>
       <div class="modal-text">
-        <p>1. Мы собираем только email для работы сервиса.</p>
-        <p>2. Пароли не используются — вход по одноразовому коду.</p>
+        <p>1. Мы собираем только email для идентификации пользователя.</p>
+        <p>2. Пароли не используются.</p>
         <p>3. Мы не передаём данные третьим лицам.</p>
         <p>4. ИИ-репетитор использует Google Gemini API — ваши запросы отправляются на серверы Google.</p>
         <p>5. Вы можете удалить аккаунт в любой момент, все данные будут удалены.</p>
-        <p>6. Мы используем куки только для хранения темы и API-ключа (локально).</p>
       </div>
       <button class="btn-primary" onclick="closeModal('privacyModal')">Закрыть</button>
     </div>
   </div>
-
-<script>
-  const firebaseConfig = {
-    apiKey: window.FIREBASE_API_KEY,
-    authDomain: "helps-debcc.firebaseapp.com",
-    projectId: "helps-debcc",
-    storageBucket: "helps-debcc.firebasestorage.app",
-    messagingSenderId: "521229004953",
-    appId: "1:521229004953:web:2c2f4fc8affe76ada80808"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-
-  window.firebaseSendSignInLink = (email) => {
-    const actionCodeSettings = {
-      url: window.location.href,
-      handleCodeInApp: true
-    };
-    return auth.sendSignInLinkToEmail(email, actionCodeSettings);
-  };
-
-  window.firebaseSignInWithLink = (email, link) => {
-    return auth.signInWithEmailLink(email, link);
-  };
-
-  window.firebaseSignOut = () => auth.signOut();
-
-  window.firebaseOnAuthChange = (callback) => {
-    return auth.onAuthStateChanged(callback);
-  };
-</script>
 
   <script src="script.js"></script>
 </body>
